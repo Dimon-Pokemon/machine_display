@@ -3,9 +3,10 @@ from point import Point
 import threading
 
 if __name__ == "__main__":
-    app = App()
     point = Point(5, 0, "#1f1", 160, 160, 20)
-    app.points.update([(5, point)])
+    points_dict = {}
+    points_dict.update([(5, point)])
+    app = App(points_dict)
     app.build_input_form()
     app.start()
     # threading.Thread(target=app.start).start()
