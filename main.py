@@ -3,7 +3,7 @@ from point import Point
 import threading
 
 if __name__ == "__main__":
-    point = Point(5, 0, "#1f1", 160, 160, 20)
+    point = Point(5, "Активна", "#1f1", 160, 160)
     points_dict = {}
     points_dict.update([(5, point)])
     app = App(points_dict)

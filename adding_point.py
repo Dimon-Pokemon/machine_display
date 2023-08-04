@@ -19,7 +19,7 @@ class AddingPoint:
         label_y = Label(window_adding_point, text="Координата y точки")
         entry_y = Entry(window_adding_point)
         label_state = Label(window_adding_point, text="Состояние: ")
-        combobox_state = ttk.Combobox(window_adding_point)
+        combobox_state = ttk.Combobox(window_adding_point, state="readonly", values=["Активна", "Неактивна"])
         label_color = Label(window_adding_point, text="Цвет: ")
         button_color = Button(window_adding_point, text="", bg="red", width=10, command=lambda: self.set_color(button_color))
         buttom_save = Button(window_adding_point, text="Добавить", command=lambda: self.add_point(entry_id, combobox_state, button_color, entry_x, entry_y, window_adding_point))

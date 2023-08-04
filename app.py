@@ -36,19 +36,21 @@ class App:
         self.canvas.delete("point") # Удаление всех точек
         # Перебор точек по их id и отрисовка их на экране
         for id_point in self.points_dict:
-            self.canvas.create_oval(self.points_dict[id_point].x - 5,
-                                    self.points_dict[id_point].y - 5,
-                                    self.points_dict[id_point].x + 5,
-                                    self.points_dict[id_point].y + 5,
-                                    fill=self.points_dict[id_point].color,
-                                    tags="point") # Тэг для всех точек. По нему происходит удаление (стриание) точек
+            if self.points_dict[id_point].state == "Активна":
+                self.canvas.create_oval(self.points_dict[id_point].x - 5,
+                                        self.points_dict[id_point].y - 5,
+                                        self.points_dict[id_point].x + 5,
+                                        self.points_dict[id_point].y + 5,
+                                        fill=self.points_dict[id_point].color,
+                                        tags="point") # Тэг для всех точек. По нему происходит удаление (стриание) точек
 
     def build_input_form(self):
         label_points = Label(self.input_form, text="Точка: ")
         combobox_points = ttk.Combobox(self.input_form, textvariable=self.select_point_id, values=list(self.points_dict.keys()), state="readonly")
-        combobox_points.bind("<<ComboboxSelected>>", lambda _: self.activation_of_ui_elements(combobox_points, combobox_state, button_color))
+        combobox_points.bind("<<ComboboxSelected>>", lambda _: self.activation_of_ui_elements(combobox_points, combobox_state, button_color, button_delete_point))
         label_state = Label(self.input_form, text="Состояние: ")
-        combobox_state = ttk.Combobox(self.input_form, state="readonly")
+        combobox_state = ttk.Combobox(self.input_form, state="readonly", values=["Активна", "Неактивна"])
+        combobox_state.bind("<<ComboboxSelected>>", lambda _: self.set_state_point(combobox_state.get()))
         label_color = Label(self.input_form, text="Цвет: ")
         button_color = Button(self.input_form, text="", bg="red", width=10, command=lambda : self.set_color(button_color))
         button_add_point = Button(self.input_form, text="Добавить новую точку", command=lambda: self.add_point(combobox_points))
@@ -80,6 +82,8 @@ class App:
     def add_point(self, combobox_points):
         AddingPoint(self.points_dict, combobox_points)
 
+    def set_state_point(self, state):
+        self.points_dict[self.select_point_id].state = state
 
     def delete_point(self):
         self.points_dict.pop(self.select_point_id)
