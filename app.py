@@ -5,11 +5,14 @@ from adding_point import AddingPoint
 
 
 class App:
+    image = None
     root = Tk()
     root.geometry("1000x700")
-    root.title("")
-    input_form = Toplevel()
+    root.title("Дисплейные точки")
     canvas = Canvas(root, width=root.winfo_screenwidth(), height=root.winfo_screenheight())
+
+    input_form = Toplevel()
+
 
     points_dict: "List of points" = None # Словарь с точками вида "ID: point"
     select_point_id = None
@@ -17,6 +20,22 @@ class App:
     def __init__(self, points_dict):
         self.points_dict = points_dict
         self.canvas.pack()
+
+        menu = Menu(self.root)
+        self.root.config(menu=menu)
+        filemenu = Menu(menu)
+        filemenu.add_command(label="Октрыть...", command=self.open_image)
+        filemenu.add_command(label="Сохранить", command=self.save)
+        filemenu.add_command(label="Отобразить редактор точек", command=self.build_input_form)
+        filemenu.add_separator()
+        filemenu.add_command(label="Выход", command=self.root.destroy)
+        menu.add_cascade(label="Файл", menu=filemenu)
+
+    def open_image(self):
+        pass
+
+    def save(self):
+        pass
 
     def print_points(self):
         """
