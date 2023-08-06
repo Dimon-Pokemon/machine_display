@@ -11,7 +11,7 @@ class App:
     root.title("Дисплейные точки")
     canvas = Canvas(root, width=root.winfo_screenwidth(), height=root.winfo_screenheight())
 
-    input_form = Toplevel()
+    input_form = None
 
 
     points_dict: "List of points" = None # Словарь с точками вида "ID: point"
@@ -54,6 +54,7 @@ class App:
                                         tags="point") # Тэг для всех точек. По нему происходит удаление (стриание) точек
 
     def build_input_form(self):
+        self.input_form = Toplevel()
         label_points = Label(self.input_form, text="Точка: ")
         combobox_points = ttk.Combobox(self.input_form, textvariable=self.select_point_id, values=list(self.points_dict.keys()), state="readonly")
         combobox_points.bind("<<ComboboxSelected>>", lambda _: self.activation_of_ui_elements(combobox_points, combobox_state, button_color, button_delete_point))
@@ -106,5 +107,6 @@ class App:
     def start(self):
         while True:
             self.root.update()
-            self.input_form.update()
+            if self.input_form:
+                self.input_form.update()
             self.print_points()
