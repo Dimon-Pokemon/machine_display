@@ -10,22 +10,12 @@ class App:
     root.title("")
     input_form = Toplevel()
     canvas = Canvas(root, width=root.winfo_screenwidth(), height=root.winfo_screenheight())
-    step_row = 25 # Расстояние между горизонтальными линиями сетки
-    step_column = 25 # Расстояние между вертикальными линиями сетки
 
     points_dict: "List of points" = None # Словарь с точками вида "ID: point"
     select_point_id = None
 
-    def __init__(self, points_dict, step_row=25, step_column=25):
+    def __init__(self, points_dict):
         self.points_dict = points_dict
-        self.step_row = step_row # Расстояние между горизонтальными линиями сетки
-        self.step_column = step_column # Расстояние между вертикальными линиями сетки
-
-        # Создание сетки
-        for i in range(0, 1920, self.step_row):
-            self.canvas.create_line(0, i, 1920, i)
-        for i in range(0, 1920, self.step_column):
-            self.canvas.create_line(i, 0, i, 1080)
         self.canvas.pack()
 
     def print_points(self):
