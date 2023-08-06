@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import ttk
 from tkinter import colorchooser
+from tkinter import filedialog
 from adding_point import AddingPoint
 
 
@@ -11,6 +12,7 @@ class App:
     root.title("Дисплейные точки")
     canvas = Canvas(root, width=root.winfo_screenwidth(), height=root.winfo_screenheight())
 
+    image = None
     input_form = None
 
 
@@ -32,7 +34,14 @@ class App:
         menu.add_cascade(label="Файл", menu=filemenu)
 
     def open_image(self):
-        pass
+        file_path = filedialog.askopenfilename()
+        with open(file=file_path, mode="rb") as file:
+            data = file.read()
+        image = PhotoImage(data=data)
+        self.root.geometry(f"{image.width()}x{image.height()}")
+        # image = PhotoImage(file = file_path)
+        self.image = image
+        self.canvas.create_image(0, 0, image=image, anchor="nw")
 
     def save(self):
         pass
