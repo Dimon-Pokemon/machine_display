@@ -84,7 +84,7 @@ class App:
                               command=lambda: self.set_color(button_color))
         button_add_point = Button(self.input_form, text="Добавить новую точку",
                                   command=lambda: self.add_point(combobox_points, combobox_state))
-        button_delete_point = Button(self.input_form, text="Удалить точку", command=self.delete_point)
+        button_delete_point = Button(self.input_form, text="Удалить точку", command=lambda : self.delete_point(combobox_points))
 
         # Деактивация некоторых графических элементов (до выбора конкретной точки)
         combobox_state['state'] = 'disable'
@@ -114,8 +114,13 @@ class App:
         Метод выбирает следующую или предыдущую точку при нажатии стрелочки <- ->, а затем
         вызывает метод для активации графических элементов для редактирования
         """
+        # Проверка на наличие точек. Если точек нет, то метод завершает свое выполнение
+        if len(self.points_dict) == 0:
+            return # досрочное завершение работы метода
+
         points = list(self.points_dict.keys())  # Массив ключей
         points.sort()
+
         if self.select_point_id:
             index = points.index(self.select_point_id)  # Получаем индекс ключа в списке ключей
             # Если выбрана последняя точка и нажата клавиша ->(выбрать СЛЕДУЮЩУЮ точку), то
@@ -144,8 +149,11 @@ class App:
     def set_state_point(self, state):
         self.points_dict[self.select_point_id].state = state
 
-    def delete_point(self):
+    def delete_point(self, combobox_points):
         self.points_dict.pop(self.select_point_id)
+        self.select_point_id = None
+        combobox_points['values'] = tuple(self.points_dict.keys())
+        combobox_points.set('')
 
     def set_color(self, colored_button):
         color_chooser = colorchooser.askcolor()
