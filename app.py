@@ -28,7 +28,7 @@ class App:
         filemenu = Menu(menu)
         filemenu.add_command(label="Октрыть...", command=self.open_image)
         filemenu.add_command(label="Сохранить", command=self.save)
-        filemenu.add_command(label="Отобразить редактор точек", command=self.build_input_form)
+        filemenu.add_command(label="Отобразить редактор точек", command=self.build_edit_points_form)
         filemenu.add_separator()
         filemenu.add_command(label="Выход", command=self.root.destroy)
         menu.add_cascade(label="Файл", menu=filemenu)
@@ -62,7 +62,7 @@ class App:
                                         fill=self.points_dict[id_point].color,
                                         tags="point") # Тэг для всех точек. По нему происходит удаление (стриание) точек
 
-    def build_input_form(self):
+    def build_edit_points_form(self):
         self.input_form = Toplevel()
         label_points = Label(self.input_form, text="Точка: ")
         combobox_points = ttk.Combobox(self.input_form, textvariable=self.select_point_id, values=list(self.points_dict.keys()), state="readonly")
@@ -72,7 +72,7 @@ class App:
         combobox_state.bind("<<ComboboxSelected>>", lambda _: self.set_state_point(combobox_state.get()))
         label_color = Label(self.input_form, text="Цвет: ")
         button_color = Button(self.input_form, text="", bg="red", width=10, command=lambda : self.set_color(button_color))
-        button_add_point = Button(self.input_form, text="Добавить новую точку", command=lambda: self.add_point(combobox_points))
+        button_add_point = Button(self.input_form, text="Добавить новую точку", command=lambda: self.add_point(combobox_points, combobox_state))
         button_delete_point = Button(self.input_form, text="Удалить точку", command=self.delete_point)
 
         # Деактивация некоторых графических элементов (до выбора конкретной точки)
@@ -94,12 +94,14 @@ class App:
     def activation_of_ui_elements(self, combobox_points, combobox_state, button_color, button_delete):
         self.select_point_id = int(combobox_points.get())
         combobox_state['state'] = 'active'
+        combobox_state.set(self.points_dict[self.select_point_id].state)
         button_color['state'] = 'active'
         button_delete['state'] = 'active'
 
     #  Метод для добавления новой точки
-    def add_point(self, combobox_points):
+    def add_point(self, combobox_points, combobox_state):
         AddingPoint(self.points_dict, combobox_points)
+        combobox_state.set('')
 
     def set_state_point(self, state):
         self.points_dict[self.select_point_id].state = state

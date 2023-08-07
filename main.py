@@ -7,7 +7,7 @@ if __name__ == "__main__":
     points_dict = {}
     points_dict.update([(5, point)])
     app = App(points_dict)
-    app.build_input_form()
+    app.build_edit_points_form()
     app.start()
     # threading.Thread(target=app.start).start()
 
