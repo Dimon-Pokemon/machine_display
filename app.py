@@ -15,8 +15,7 @@ class App:
     image = None
     input_form = None
 
-
-    points_dict: "List of points" = None # Словарь с точками вида "ID: point"
+    points_dict: "List of points" = {}  # Словарь с точками вида "ID: point"
     select_point_id = None
 
     def __init__(self, points_dict):
@@ -51,7 +50,7 @@ class App:
         Метод добавляет точки из словаря точек на экран, предварительно удалив все точки, чтобы
         не отображать удаленные из словаря точки.
         """
-        self.canvas.delete("point") # Удаление всех точек
+        self.canvas.delete("point")  # Удаление всех точек
         # Перебор точек по их id и отрисовка их на экране
         for id_point in self.points_dict:
             if self.points_dict[id_point].state == "Активна":
@@ -60,19 +59,31 @@ class App:
                                         self.points_dict[id_point].x + 5,
                                         self.points_dict[id_point].y + 5,
                                         fill=self.points_dict[id_point].color,
-                                        tags="point") # Тэг для всех точек. По нему происходит удаление (стриание) точек
+                                        tags="point")  # Тэг для всех точек. По нему происходит удаление (стриание) точек
 
     def build_edit_points_form(self):
         self.input_form = Toplevel()
+        self.input_form.focus_set()
         label_points = Label(self.input_form, text="Точка: ")
-        combobox_points = ttk.Combobox(self.input_form, textvariable=self.select_point_id, values=list(self.points_dict.keys()), state="readonly")
-        combobox_points.bind("<<ComboboxSelected>>", lambda _: self.activation_of_ui_elements(combobox_points, combobox_state, button_color, button_delete_point))
+        combobox_points = ttk.Combobox(self.input_form, textvariable=self.select_point_id,
+                                       values=list(self.points_dict.keys()), state="readonly")
+        combobox_points.bind("<<ComboboxSelected>>", lambda _: self.activation_of_ui_elements(combobox_points,
+                                                                                              combobox_state,
+                                                                                              button_color,
+                                                                                              button_delete_point))
+        self.input_form.bind("<Right>", lambda _: self.select_next_point(combobox_points, combobox_state, button_color,
+                                                                         button_delete_point, "Right"))
+        self.input_form.bind("<Left>", lambda _: self.select_next_point(combobox_points, combobox_state, button_color,
+                                                                        button_delete_point, "Left"))
+        # self.input_form.bind("<Key>", lambda event: print(event.char, event.keysym, event.keycode))
         label_state = Label(self.input_form, text="Состояние: ")
         combobox_state = ttk.Combobox(self.input_form, state="readonly", values=["Активна", "Неактивна"])
         combobox_state.bind("<<ComboboxSelected>>", lambda _: self.set_state_point(combobox_state.get()))
         label_color = Label(self.input_form, text="Цвет: ")
-        button_color = Button(self.input_form, text="", bg="red", width=10, command=lambda : self.set_color(button_color))
-        button_add_point = Button(self.input_form, text="Добавить новую точку", command=lambda: self.add_point(combobox_points, combobox_state))
+        button_color = Button(self.input_form, text="", bg="red", width=10,
+                              command=lambda: self.set_color(button_color))
+        button_add_point = Button(self.input_form, text="Добавить новую точку",
+                                  command=lambda: self.add_point(combobox_points, combobox_state))
         button_delete_point = Button(self.input_form, text="Удалить точку", command=self.delete_point)
 
         # Деактивация некоторых графических элементов (до выбора конкретной точки)
@@ -97,6 +108,33 @@ class App:
         combobox_state.set(self.points_dict[self.select_point_id].state)
         button_color['state'] = 'active'
         button_delete['state'] = 'active'
+
+    def select_next_point(self, combobox_points, combobox_state, button_color, button_delete_point, pointer):
+        """
+        Метод выбирает следующую или предыдущую точку при нажатии стрелочки <- ->, а затем
+        вызывает метод для активации графических элементов для редактирования
+        """
+        points = list(self.points_dict.keys())  # Массив ключей
+        points.sort()
+        if self.select_point_id:
+            index = points.index(self.select_point_id)  # Получаем индекс ключа в списке ключей
+            # Если выбрана последняя точка и нажата клавиша ->(выбрать СЛЕДУЮЩУЮ точку), то
+            if index == len(self.points_dict) - 1 and pointer == "Right":
+                self.select_point_id = points[0]  # Берем ПЕРВУЮ точку
+            # Если выбрана первая точка и нажата клавиша <-(выбрать ПРЕДЫДУЩУЮ точку), то
+            elif index == 0 and pointer == "Left":
+                self.select_point_id = points[len(self.points_dict) - 1]  # Берем ПОСЛЕДНЮЮ точку
+            else:
+                if pointer == "Right":
+                    self.select_point_id = index + 1
+                else:
+                    self.select_point_id = index - 1
+            combobox_points.set(self.select_point_id)
+        else:
+            if len(self.points_dict) > 0:  # Если есть точки
+                self.select_point_id = points[0]  # Сохраняем id выбранной точки
+                combobox_points.set(points[0])  # Выбираем первую точку в ComboBox
+        self.activation_of_ui_elements(combobox_points, combobox_state, button_color, button_delete_point)
 
     #  Метод для добавления новой точки
     def add_point(self, combobox_points, combobox_state):
