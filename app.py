@@ -6,12 +6,12 @@ from adding_point import AddingPoint
 
 
 class App:
-    image = None
     root = Tk()
     root.geometry("1000x700")
     root.title("Дисплейные точки")
     canvas = Canvas(root, width=root.winfo_screenwidth(), height=root.winfo_screenheight())
 
+    path_to_image = None
     image = None
     input_form = None
 
@@ -34,6 +34,7 @@ class App:
 
     def open_image(self):
         file_path = filedialog.askopenfilename()
+        self.path_to_image = file_path
         with open(file=file_path, mode="rb") as file:
             data = file.read()
         image = PhotoImage(data=data)
