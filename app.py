@@ -3,6 +3,7 @@ from tkinter import ttk
 from tkinter import colorchooser
 from tkinter import filedialog
 from adding_point import AddingPoint
+from tools_for_working_with_saves import *
 
 
 class App:
@@ -11,7 +12,8 @@ class App:
     root.title("Дисплейные точки")
     canvas = Canvas(root, width=root.winfo_screenwidth(), height=root.winfo_screenheight())
 
-    path_to_image = None
+    path_to_image = None # не знаю, нужно ли это
+    bytes_image = None
     image = None
     input_form = None
 
@@ -26,25 +28,41 @@ class App:
         self.root.config(menu=menu)
         filemenu = Menu(menu)
         filemenu.add_command(label="Октрыть...", command=self.open_image)
+        filemenu.add_command(label="Открыть сохранение...", command=self.open_save)
         filemenu.add_command(label="Сохранить", command=self.save)
         filemenu.add_command(label="Отобразить редактор точек", command=self.build_edit_points_form)
         filemenu.add_separator()
         filemenu.add_command(label="Выход", command=self.root.destroy)
         menu.add_cascade(label="Файл", menu=filemenu)
 
+    def open_save(self):
+        path_to_save_file = filedialog.askopenfilename()
+        point, data_image = get_point_and_image_from_save_file(path_to_save_file)
+
+        self.points_dict.update([(int(point.id), point)])
+
+        image = PhotoImage(data=data_image)
+        self.root.geometry(f"{image.width()}x{image.height()}")
+        self.image = image
+        self.canvas.create_image(0, 0, image=image, anchor="nw")
+        print(self.points_dict)
+
     def open_image(self):
         file_path = filedialog.askopenfilename()
         self.path_to_image = file_path
         with open(file=file_path, mode="rb") as file:
             data = file.read()
+            self.bytes_image = data
         image = PhotoImage(data=data)
         self.root.geometry(f"{image.width()}x{image.height()}")
-        # image = PhotoImage(file = file_path)
         self.image = image
         self.canvas.create_image(0, 0, image=image, anchor="nw")
 
     def save(self):
-        pass
+        file_name = filedialog.asksaveasfilename()
+        json_point_info = point_object_to_json(self.points_dict[self.select_point_id])
+        serialization_json_point_info = serialization_json_string(json_point_info)
+        write_bytes(serialization_json_point_info, self.bytes_image, file_name)
 
     def print_points(self):
         """
