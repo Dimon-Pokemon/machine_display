@@ -6,6 +6,12 @@ from adding_point import AddingPoint
 from tools_for_working_with_saves import *
 
 
+def validate_coordinate_entry(data: str) -> bool:
+    if data.isdigit() or data == '':
+        return True
+    return False
+
+
 class App:
     image_formats = ("pgm", "ppm", "gif", "png")
 
@@ -107,11 +113,13 @@ class App:
         combobox_points.bind("<<ComboboxSelected>>", lambda _: self.activation_of_ui_elements(combobox_points,
                                                                                               combobox_state,
                                                                                               button_color,
-                                                                                              button_delete_point))
+                                                                                              button_delete_point,
+                                                                                              label_x, label_y,
+                                                                                              entry_x, entry_y,))
         self.input_form.bind("<Right>", lambda _: self.select_next_point(combobox_points, combobox_state, button_color,
-                                                                         button_delete_point, "Right"))
+                                                                         button_delete_point, label_x, label_y, entry_x, entry_y, "Right"))
         self.input_form.bind("<Left>", lambda _: self.select_next_point(combobox_points, combobox_state, button_color,
-                                                                        button_delete_point, "Left"))
+                                                                        button_delete_point, label_x, label_y, entry_x, entry_y, "Left"))
         # self.input_form.bind("<Key>", lambda event: print(event.char, event.keysym, event.keycode))
         label_state = Label(self.input_form, text="Состояние: ")
         combobox_state = ttk.Combobox(self.input_form, state="readonly", values=["Активна", "Неактивна"])
@@ -126,16 +134,27 @@ class App:
 
         button_next_point = Button(self.input_form, text=">>",
                                    command=lambda: self.select_next_point(combobox_points, combobox_state, button_color,
-                                                                          button_delete_point, "Right"))
+                                                                          button_delete_point, label_x, label_y, entry_x, entry_y, "Right"))
         button_previous_point = Button(self.input_form, text="<<",
                                        command=lambda: self.select_next_point(combobox_points, combobox_state,
                                                                               button_color,
-                                                                              button_delete_point, "Left"))
+                                                                              button_delete_point, label_x, label_y, entry_x, entry_y, "Left"))
+        validate_command = (self.input_form.register(validate_coordinate_entry), '%P')
+        label_x = Label(self.input_form, text="Координата x точки:")
+        entry_x = Entry(self.input_form, validate="key", validatecommand=validate_command)
+        entry_x.bind('<KeyRelease>', lambda _: self.change_point_coordinate(entry_x=entry_x))
+        label_y = Label(self.input_form, text="Координата y точки:")
+        entry_y = Entry(self.input_form, validate="key", validatecommand=validate_command)
+        entry_y.bind('<KeyRelease>', lambda _: self.change_point_coordinate(entry_y=entry_y))
 
         # Деактивация некоторых графических элементов (до выбора конкретной точки)
         combobox_state['state'] = 'disable'
         button_color['state'] = 'disable'
         button_delete_point['state'] = 'disable'
+        label_x['state'] = 'disable'
+        entry_x['state'] = 'disable'
+        label_y['state'] = 'disable'
+        entry_y['state'] = 'disable'
 
         # Размещение элементов интерфейса на форме
         button_previous_point.grid(row=0, column=0, sticky="nw")
@@ -146,18 +165,43 @@ class App:
         label_state.grid(row=2, column=0)
         label_color.grid(row=3, column=0)
         button_color.grid(row=3, column=1)
-        button_add_point.grid(row=4, column=0)
-        button_delete_point.grid(row=4, column=2)
+        label_x.grid(row=4, column=0)
+        entry_x.grid(row=4, column=1)
+        label_y.grid(row=5, column=0)
+        entry_y.grid(row=5, column=1)
+        button_add_point.grid(row=6, column=0)
+        button_delete_point.grid(row=6, column=2)
+
+    def change_point_coordinate(self, entry_x: Entry = None, entry_y: Entry = None):
+        if entry_x:
+            entry_x_data = entry_x.get()
+            if entry_x_data != '':
+                self.points_dict[self.select_point_id].x = int(entry_x_data)
+        elif entry_y:
+            entry_y_data = entry_y.get()
+            if entry_y_data != '':
+                self.points_dict[self.select_point_id].y = int(entry_y_data)
+        else:
+            print("Error")
 
     # Метод для активации графиечких элементов управления при выборе какой-либо точки
-    def activation_of_ui_elements(self, combobox_points, combobox_state, button_color, button_delete):
+    def activation_of_ui_elements(self, combobox_points, combobox_state, button_color, button_delete, label_x, label_y, entry_x: Entry, entry_y):
         self.select_point_id = int(combobox_points.get())
         combobox_state['state'] = 'active'
         combobox_state.set(self.points_dict[self.select_point_id].state)
         button_color['state'] = 'active'
+        # button_color['bg'] = self.points_dict[self.select_point_id].color
         button_delete['state'] = 'active'
+        label_x['state'] = 'active'
+        entry_x['state'] = 'normal'
+        entry_x.delete(0, 'end')
+        entry_x.insert(END, str(self.points_dict[self.select_point_id].x))
+        label_y['state'] = 'active'
+        entry_y['state'] = 'normal'
+        entry_y.delete(0, 'end')
+        entry_y.insert(END, str(self.points_dict[self.select_point_id].y))
 
-    def select_next_point(self, combobox_points, combobox_state, button_color, button_delete_point, pointer):
+    def select_next_point(self, combobox_points, combobox_state, button_color, button_delete_point, label_x, label_y, entry_x, entry_y, pointer):
         """
         Метод выбирает следующую или предыдущую точку при нажатии стрелочки <- ->, а затем
         вызывает метод для активации графических элементов для редактирования
@@ -187,7 +231,7 @@ class App:
             if len(self.points_dict) > 0:  # Если есть точки
                 self.select_point_id = points[0]  # Сохраняем id выбранной точки
                 combobox_points.set(points[0])  # Выбираем первую точку в ComboBox
-        self.activation_of_ui_elements(combobox_points, combobox_state, button_color, button_delete_point)
+        self.activation_of_ui_elements(combobox_points, combobox_state, button_color, button_delete_point, label_x, label_y, entry_x, entry_y,)
 
     #  Метод для добавления новой точки
     def add_point(self, combobox_points, combobox_state):
