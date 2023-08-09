@@ -14,12 +14,12 @@ class App:
     root.title("Дисплейные точки")
     canvas = Canvas(root, width=root.winfo_screenwidth(), height=root.winfo_screenheight())
 
-    path_to_image = None # не знаю, нужно ли это
+    path_to_image = None  # не знаю, нужно ли это
     bytes_image = None
     image = None
     input_form = None
 
-    points_dict: "List of points" = {}  # Словарь с точками вида "ID: point"
+    points_dict: "List of points" = {}  # Словарь с точками вида "id: Point"
     select_point_id = None
 
     def __init__(self, points_dict):
@@ -54,8 +54,8 @@ class App:
         Если параметр bytes_file_save ЗАДАН,  то в метод get_point_and_image_from_save_file передается данный параметр
         в качестве аргумента bytes_file_save
         """
-        if bytes_file_save is None: # Если не были переданы байты, считанные с файла сохранения
-            path_to_save_file = filedialog.askopenfilename() # Спрашиваем путь до файла сохранения
+        if bytes_file_save is None:  # Если не были переданы байты, считанные с файла сохранения
+            path_to_save_file = filedialog.askopenfilename()  # Спрашиваем путь до файла сохранения
             points_dict, bytes_image = get_point_and_image_from_save_file(save_file_name=path_to_save_file)
         else:
             points_dict, bytes_image = get_point_and_image_from_save_file(bytes_file_save=bytes_file_save)
@@ -64,17 +64,19 @@ class App:
         self.set_image(bytes_image)
 
     def open_new_image_or_file_save(self):
+        """Метод для открытия нового изображения для редактирования или файла сохранения"""
         file_path = filedialog.askopenfilename()
         self.path_to_image = file_path
         with open(file=file_path, mode="rb") as file:
             bytes_image_or_file_save = file.read()
             self.bytes_image = bytes_image_or_file_save
-        if file_path[len(file_path)-3:] in self.image_formats:
+        if file_path[len(file_path) - 3:] in self.image_formats:
             self.set_image(bytes_image_or_file_save)
         else:
             self.open_save(bytes_file_save=bytes_image_or_file_save)
 
     def save(self):
+        """Метод для сохранения изображения с размещенными на нем точками"""
         file_name = filedialog.asksaveasfilename()
         json_point_info = point_objects_to_json(self.points_dict)
         serialization_json_point_info = serialization_json_string(json_point_info)
@@ -119,7 +121,16 @@ class App:
                               command=lambda: self.set_color(button_color))
         button_add_point = Button(self.input_form, text="Добавить новую точку",
                                   command=lambda: self.add_point(combobox_points, combobox_state))
-        button_delete_point = Button(self.input_form, text="Удалить точку", command=lambda : self.delete_point(combobox_points))
+        button_delete_point = Button(self.input_form, text="Удалить точку",
+                                     command=lambda: self.delete_point(combobox_points))
+
+        button_next_point = Button(self.input_form, text=">>",
+                                   command=lambda: self.select_next_point(combobox_points, combobox_state, button_color,
+                                                                          button_delete_point, "Right"))
+        button_previous_point = Button(self.input_form, text="<<",
+                                       command=lambda: self.select_next_point(combobox_points, combobox_state,
+                                                                              button_color,
+                                                                              button_delete_point, "Left"))
 
         # Деактивация некоторых графических элементов (до выбора конкретной точки)
         combobox_state['state'] = 'disable'
@@ -127,14 +138,16 @@ class App:
         button_delete_point['state'] = 'disable'
 
         # Размещение элементов интерфейса на форме
-        combobox_points.grid(row=0, column=1)
-        label_points.grid(row=0, column=0)
-        combobox_state.grid(row=1, column=1)
-        label_state.grid(row=1, column=0)
-        label_color.grid(row=2, column=0)
-        button_color.grid(row=2, column=1)
-        button_add_point.grid(row=3, column=0)
-        button_delete_point.grid(row=3, column=3)
+        button_previous_point.grid(row=0, column=0, sticky="nw")
+        button_next_point.grid(row=0, column=2, sticky="ne")
+        combobox_points.grid(row=1, column=1)
+        label_points.grid(row=1, column=0)
+        combobox_state.grid(row=2, column=1)
+        label_state.grid(row=2, column=0)
+        label_color.grid(row=3, column=0)
+        button_color.grid(row=3, column=1)
+        button_add_point.grid(row=4, column=0)
+        button_delete_point.grid(row=4, column=2)
 
     # Метод для активации графиечких элементов управления при выборе какой-либо точки
     def activation_of_ui_elements(self, combobox_points, combobox_state, button_color, button_delete):
@@ -151,7 +164,7 @@ class App:
         """
         # Проверка на наличие точек. Если точек нет, то метод завершает свое выполнение
         if len(self.points_dict) == 0:
-            return # досрочное завершение работы метода
+            return  # досрочное завершение работы метода
 
         points = list(self.points_dict.keys())  # Массив ключей
         points.sort()
@@ -166,9 +179,9 @@ class App:
                 self.select_point_id = points[len(self.points_dict) - 1]  # Берем ПОСЛЕДНЮЮ точку
             else:
                 if pointer == "Right":
-                    self.select_point_id = index + 1
+                    self.select_point_id = points[index + 1]
                 else:
-                    self.select_point_id = index - 1
+                    self.select_point_id = points[index - 1]
             combobox_points.set(self.select_point_id)
         else:
             if len(self.points_dict) > 0:  # Если есть точки
