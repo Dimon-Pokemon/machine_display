@@ -4,12 +4,13 @@ from tkinter import colorchooser
 from tkinter import filedialog
 from adding_point import AddingPoint
 from tools_for_working_with_saves import *
+from edit_points_form import EditPointsForm
 
 
-def validate_coordinate_entry(data: str) -> bool:
-    if data.isdigit() or data == '':
-        return True
-    return False
+# def validate_coordinate_entry(data: str) -> bool:
+#     if data.isdigit() or data == '':
+#         return True
+#     return False
 
 
 class App:
@@ -20,7 +21,8 @@ class App:
     root.title("Дисплейные точки")
     canvas = Canvas(root, width=root.winfo_screenwidth(), height=root.winfo_screenheight())
 
-    input_form = None # Окно редактирования точек
+    input_form_window = None # Окно редактирования точек
+    input_form_class = None
 
     path_to_image = None  # не знаю, нужно ли это
     bytes_image = None
@@ -58,11 +60,15 @@ class App:
         y = self.root.winfo_pointery() - self.root.winfo_rooty()
         for point in self.points_dict.values():
             if point.x-5 < x < point.x+5 and point.y-5< y < point.y+5:
-                self.select_point_id = point.id
-                print("Выбрана точка: ", self.select_point_id)
-
-    def set_select_point_id(self, point_id):
-        self.select_point_id = point_id
+                if self.select_point_id:
+                    print("Замена выбранно точки ", self.select_point_id, " на новую точку ", point.id)
+                    # self.select_point_id = point.id
+                    self.input_form_class.select_new_point_and_display_on_edit_point_form(point.id)
+                else:
+                    self.select_point_id = point.id
+                    if self.input_form_window:
+                        self.input_form_class.select_new_point_and_display_on_edit_point_form(self.select_point_id)
+                    print("Выбрана точка: ", self.select_point_id)
 
     def open_save(self, bytes_file_save=None):
         """
@@ -118,80 +124,8 @@ class App:
                                         tags="point")  # Тэг для всех точек. По нему происходит удаление (стриание) точек
 
     def build_edit_points_form(self):
-        self.input_form = Toplevel()
-        self.input_form.focus_set()
-        label_points = Label(self.input_form, text="Точка: ")
-        combobox_points = ttk.Combobox(self.input_form,
-                                       values=list(self.points_dict.keys()), state="readonly")
-        combobox_points.bind("<<ComboboxSelected>>", lambda _: self.activation_of_ui_elements(combobox_points,
-                                                                                              combobox_state,
-                                                                                              button_color,
-                                                                                              button_delete_point,
-                                                                                              label_x, label_y,
-                                                                                              entry_x, entry_y,))
-        self.input_form.bind("<Right>", lambda _: self.select_next_or_previous_point(combobox_points, combobox_state, button_color,
-                                                                                     button_delete_point, label_x, label_y, entry_x, entry_y, "next"))
-        self.input_form.bind("<Left>", lambda _: self.select_next_or_previous_point(combobox_points, combobox_state, button_color,
-                                                                                    button_delete_point, label_x, label_y, entry_x, entry_y, "previous"))
-        label_state = Label(self.input_form, text="Состояние: ")
-        combobox_state = ttk.Combobox(self.input_form, state="readonly", values=["Активна", "Неактивна"])
-        combobox_state.bind("<<ComboboxSelected>>", lambda _: self.set_state_point(combobox_state.get()))
-        label_color = Label(self.input_form, text="Цвет: ")
-        button_color = Button(self.input_form, text="", bg="red", width=10,
-                              command=lambda: self.set_color(button_color))
-        button_add_point = Button(self.input_form, text="Добавить новую точку",
-                                  command=lambda: self.add_point(combobox_points, combobox_state))
-        button_delete_point = Button(self.input_form, text="Удалить точку",
-                                     command=lambda: self.delete_point(combobox_points))
-
-        button_next_point = Button(self.input_form, text=">>",
-                                   command=lambda: self.select_next_or_previous_point(combobox_points, combobox_state, button_color,
-                                                                                      button_delete_point, label_x, label_y, entry_x, entry_y, "next"))
-        button_previous_point = Button(self.input_form, text="<<",
-                                       command=lambda: self.select_next_or_previous_point(combobox_points, combobox_state,
-                                                                                          button_color,
-                                                                                          button_delete_point, label_x, label_y, entry_x, entry_y, "previous"))
-        validate_command = (self.input_form.register(validate_coordinate_entry), '%P')
-        label_x = Label(self.input_form, text="Координата x точки:")
-        entry_x = Entry(self.input_form, validate="key", validatecommand=validate_command)
-        entry_x.bind('<KeyRelease>', lambda _: self.change_point_coordinate(entry_x=entry_x))
-        label_y = Label(self.input_form, text="Координата y точки:")
-        entry_y = Entry(self.input_form, validate="key", validatecommand=validate_command)
-        entry_y.bind('<KeyRelease>', lambda _: self.change_point_coordinate(entry_y=entry_y))
-
-        # Деактивация некоторых графических элементов (до выбора конкретной точки)
-        combobox_state['state'] = 'disable'
-        button_color['state'] = 'disable'
-        button_delete_point['state'] = 'disable'
-        label_x['state'] = 'disable'
-        entry_x['state'] = 'disable'
-        label_y['state'] = 'disable'
-        entry_y['state'] = 'disable'
-
-        # Размещение элементов интерфейса на форме
-        button_previous_point.grid(row=0, column=0, sticky="nw")
-        button_next_point.grid(row=0, column=2, sticky="ne")
-        combobox_points.grid(row=1, column=1)
-        label_points.grid(row=1, column=0)
-        combobox_state.grid(row=2, column=1)
-        label_state.grid(row=2, column=0)
-        label_color.grid(row=3, column=0)
-        button_color.grid(row=3, column=1)
-        label_x.grid(row=4, column=0)
-        entry_x.grid(row=4, column=1)
-        label_y.grid(row=5, column=0)
-        entry_y.grid(row=5, column=1)
-        button_add_point.grid(row=6, column=0)
-        button_delete_point.grid(row=6, column=2)
-
-        if self.select_point_id:
-            combobox_points.set(str(self.select_point_id))
-            self.activation_of_ui_elements(combobox_points,
-                                           combobox_state,
-                                           button_color,
-                                           button_delete_point,
-                                           label_x, label_y,
-                                           entry_x, entry_y, )
+        self.input_form_class = EditPointsForm(self)
+        self.input_form_window = self.input_form_class.input_form
 
     def change_point_coordinate(self, entry_x: Entry = None, entry_y: Entry = None):
         if entry_x:
@@ -277,6 +211,6 @@ class App:
     def start(self):
         while True:
             self.root.update()
-            if self.input_form:
-                self.input_form.update()
+            if self.input_form_window:
+                self.input_form_window.update()
             self.print_points()
