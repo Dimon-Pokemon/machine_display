@@ -108,7 +108,7 @@ class App:
         self.input_form = Toplevel()
         self.input_form.focus_set()
         label_points = Label(self.input_form, text="Точка: ")
-        combobox_points = ttk.Combobox(self.input_form, textvariable=self.select_point_id,
+        combobox_points = ttk.Combobox(self.input_form,
                                        values=list(self.points_dict.keys()), state="readonly")
         combobox_points.bind("<<ComboboxSelected>>", lambda _: self.activation_of_ui_elements(combobox_points,
                                                                                               combobox_state,
@@ -120,7 +120,6 @@ class App:
                                                                          button_delete_point, label_x, label_y, entry_x, entry_y, "Right"))
         self.input_form.bind("<Left>", lambda _: self.select_next_point(combobox_points, combobox_state, button_color,
                                                                         button_delete_point, label_x, label_y, entry_x, entry_y, "Left"))
-        # self.input_form.bind("<Key>", lambda event: print(event.char, event.keysym, event.keycode))
         label_state = Label(self.input_form, text="Состояние: ")
         combobox_state = ttk.Combobox(self.input_form, state="readonly", values=["Активна", "Неактивна"])
         combobox_state.bind("<<ComboboxSelected>>", lambda _: self.set_state_point(combobox_state.get()))
@@ -171,6 +170,15 @@ class App:
         entry_y.grid(row=5, column=1)
         button_add_point.grid(row=6, column=0)
         button_delete_point.grid(row=6, column=2)
+
+        if self.select_point_id:
+            combobox_points.set(str(self.select_point_id))
+            self.activation_of_ui_elements(combobox_points,
+                                           combobox_state,
+                                           button_color,
+                                           button_delete_point,
+                                           label_x, label_y,
+                                           entry_x, entry_y, )
 
     def change_point_coordinate(self, entry_x: Entry = None, entry_y: Entry = None):
         if entry_x:
