@@ -116,10 +116,10 @@ class App:
                                                                                               button_delete_point,
                                                                                               label_x, label_y,
                                                                                               entry_x, entry_y,))
-        self.input_form.bind("<Right>", lambda _: self.select_next_point(combobox_points, combobox_state, button_color,
-                                                                         button_delete_point, label_x, label_y, entry_x, entry_y, "next"))
-        self.input_form.bind("<Left>", lambda _: self.select_next_point(combobox_points, combobox_state, button_color,
-                                                                        button_delete_point, label_x, label_y, entry_x, entry_y, "previous"))
+        self.input_form.bind("<Right>", lambda _: self.select_next_or_previous_point(combobox_points, combobox_state, button_color,
+                                                                                     button_delete_point, label_x, label_y, entry_x, entry_y, "next"))
+        self.input_form.bind("<Left>", lambda _: self.select_next_or_previous_point(combobox_points, combobox_state, button_color,
+                                                                                    button_delete_point, label_x, label_y, entry_x, entry_y, "previous"))
         label_state = Label(self.input_form, text="Состояние: ")
         combobox_state = ttk.Combobox(self.input_form, state="readonly", values=["Активна", "Неактивна"])
         combobox_state.bind("<<ComboboxSelected>>", lambda _: self.set_state_point(combobox_state.get()))
@@ -132,12 +132,12 @@ class App:
                                      command=lambda: self.delete_point(combobox_points))
 
         button_next_point = Button(self.input_form, text=">>",
-                                   command=lambda: self.select_next_point(combobox_points, combobox_state, button_color,
-                                                                          button_delete_point, label_x, label_y, entry_x, entry_y, "next"))
+                                   command=lambda: self.select_next_or_previous_point(combobox_points, combobox_state, button_color,
+                                                                                      button_delete_point, label_x, label_y, entry_x, entry_y, "next"))
         button_previous_point = Button(self.input_form, text="<<",
-                                       command=lambda: self.select_next_point(combobox_points, combobox_state,
-                                                                              button_color,
-                                                                              button_delete_point, label_x, label_y, entry_x, entry_y, "previous"))
+                                       command=lambda: self.select_next_or_previous_point(combobox_points, combobox_state,
+                                                                                          button_color,
+                                                                                          button_delete_point, label_x, label_y, entry_x, entry_y, "previous"))
         validate_command = (self.input_form.register(validate_coordinate_entry), '%P')
         label_x = Label(self.input_form, text="Координата x точки:")
         entry_x = Entry(self.input_form, validate="key", validatecommand=validate_command)
@@ -209,7 +209,7 @@ class App:
         entry_y.delete(0, 'end')
         entry_y.insert(END, str(self.points_dict[self.select_point_id].y))
 
-    def select_next_point(self, combobox_points, combobox_state, button_color, button_delete_point, label_x, label_y, entry_x, entry_y, pointer):
+    def select_next_or_previous_point(self, combobox_points, combobox_state, button_color, button_delete_point, label_x, label_y, entry_x, entry_y, pointer):
         """
         Метод выбирает следующую или предыдущую точку при нажатии стрелочки <- ->, а затем
         вызывает метод для активации графических элементов для редактирования
