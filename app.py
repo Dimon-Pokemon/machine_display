@@ -20,10 +20,11 @@ class App:
     root.title("Дисплейные точки")
     canvas = Canvas(root, width=root.winfo_screenwidth(), height=root.winfo_screenheight())
 
+    input_form = None # Окно редактирования точек
+
     path_to_image = None  # не знаю, нужно ли это
     bytes_image = None
     image = None
-    input_form = None
 
     points_dict: "List of points" = {}  # Словарь с точками вида "id: Point"
     select_point_id = None
@@ -33,6 +34,7 @@ class App:
             self.points_dict = points_dict
         else:
             self.points_dict = {}
+        self.canvas.bind('<Button-1>', lambda _: self.select_point_on_click_mouse_button())
         self.canvas.pack()
 
         menu = Menu(self.root)
@@ -50,6 +52,17 @@ class App:
         self.root.geometry(f"{image.width()}x{image.height()}")
         self.image = image
         self.canvas.create_image(0, 0, image=image, anchor="nw")
+
+    def select_point_on_click_mouse_button(self):
+        x = self.root.winfo_pointerx() - self.root.winfo_rootx()
+        y = self.root.winfo_pointery() - self.root.winfo_rooty()
+        for point in self.points_dict.values():
+            if point.x-5 < x < point.x+5 and point.y-5< y < point.y+5:
+                self.select_point_id = point.id
+                print("Выбрана точка: ", self.select_point_id)
+
+    def set_select_point_id(self, point_id):
+        self.select_point_id = point_id
 
     def open_save(self, bytes_file_save=None):
         """
