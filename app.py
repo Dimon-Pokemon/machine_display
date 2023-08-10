@@ -117,9 +117,9 @@ class App:
                                                                                               label_x, label_y,
                                                                                               entry_x, entry_y,))
         self.input_form.bind("<Right>", lambda _: self.select_next_point(combobox_points, combobox_state, button_color,
-                                                                         button_delete_point, label_x, label_y, entry_x, entry_y, "Right"))
+                                                                         button_delete_point, label_x, label_y, entry_x, entry_y, "next"))
         self.input_form.bind("<Left>", lambda _: self.select_next_point(combobox_points, combobox_state, button_color,
-                                                                        button_delete_point, label_x, label_y, entry_x, entry_y, "Left"))
+                                                                        button_delete_point, label_x, label_y, entry_x, entry_y, "previous"))
         label_state = Label(self.input_form, text="Состояние: ")
         combobox_state = ttk.Combobox(self.input_form, state="readonly", values=["Активна", "Неактивна"])
         combobox_state.bind("<<ComboboxSelected>>", lambda _: self.set_state_point(combobox_state.get()))
@@ -133,11 +133,11 @@ class App:
 
         button_next_point = Button(self.input_form, text=">>",
                                    command=lambda: self.select_next_point(combobox_points, combobox_state, button_color,
-                                                                          button_delete_point, label_x, label_y, entry_x, entry_y, "Right"))
+                                                                          button_delete_point, label_x, label_y, entry_x, entry_y, "next"))
         button_previous_point = Button(self.input_form, text="<<",
                                        command=lambda: self.select_next_point(combobox_points, combobox_state,
                                                                               button_color,
-                                                                              button_delete_point, label_x, label_y, entry_x, entry_y, "Left"))
+                                                                              button_delete_point, label_x, label_y, entry_x, entry_y, "previous"))
         validate_command = (self.input_form.register(validate_coordinate_entry), '%P')
         label_x = Label(self.input_form, text="Координата x точки:")
         entry_x = Entry(self.input_form, validate="key", validatecommand=validate_command)
@@ -224,13 +224,13 @@ class App:
         if self.select_point_id:
             index = points.index(self.select_point_id)  # Получаем индекс ключа в списке ключей
             # Если выбрана последняя точка и нажата клавиша ->(выбрать СЛЕДУЮЩУЮ точку), то
-            if index == len(self.points_dict) - 1 and pointer == "Right":
+            if index == len(self.points_dict) - 1 and pointer == "next":
                 self.select_point_id = points[0]  # Берем ПЕРВУЮ точку
             # Если выбрана первая точка и нажата клавиша <-(выбрать ПРЕДЫДУЩУЮ точку), то
-            elif index == 0 and pointer == "Left":
+            elif index == 0 and pointer == "previous":
                 self.select_point_id = points[len(self.points_dict) - 1]  # Берем ПОСЛЕДНЮЮ точку
             else:
-                if pointer == "Right":
+                if pointer == "next":
                     self.select_point_id = points[index + 1]
                 else:
                     self.select_point_id = points[index - 1]
