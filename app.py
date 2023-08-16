@@ -1,5 +1,5 @@
 from tkinter import *
-from tkinter import ttk
+from sys import platform
 from tkinter import colorchooser
 from tkinter import filedialog
 from adding_point import AddingPoint
@@ -140,12 +140,15 @@ class App:
             print("Error")
 
     # Метод для активации графиечких элементов управления при выборе какой-либо точки
-    def activation_of_ui_elements(self, combobox_points, combobox_state, button_color, button_delete, label_x, label_y, entry_x: Entry, entry_y):
+    def activation_of_ui_elements(self, combobox_points, combobox_state, button_color: Button, button_delete, label_x, label_y, entry_x: Entry, entry_y):
         self.select_point_id = int(combobox_points.get())
         combobox_state['state'] = 'active'
         combobox_state.set(self.points_dict[self.select_point_id].state)
         button_color['state'] = 'active'
-        # button_color['bg'] = self.points_dict[self.select_point_id].color
+        if platform == 'darwin':
+            button_color['activebackground'] = self.points_dict[self.select_point_id].color
+        else:
+            button_color['background'] = self.points_dict[self.select_point_id].color
         button_delete['state'] = 'active'
         label_x['state'] = 'active'
         entry_x['state'] = 'normal'

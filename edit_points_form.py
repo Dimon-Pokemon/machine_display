@@ -1,5 +1,7 @@
 from tkinter import *
 from tkinter import ttk
+from sys import platform
+from tkmacosx import Button as macButton
 from tkinter import colorchooser
 
 
@@ -70,8 +72,12 @@ class EditPointsForm:
         self.combobox_state.bind("<<ComboboxSelected>>",
                                  lambda _: self.main_app_ref.set_state_point(self.combobox_state.get()))
         self.label_color = Label(self.input_form, text="Цвет: ")
-        self.button_color = Button(self.input_form, text="", bg="red", width=10,
-                                   command=lambda: self.main_app_ref.set_color(self.button_color))
+        if platform == 'darwin':
+            self.button_color = macButton(self.input_form, text="", width=100,
+                                          command=lambda: self.main_app_ref.set_color(self.button_color))
+        else:
+            self.button_color = Button(self.input_form, text="", width=10,
+                                       command=lambda: self.main_app_ref.set_color(self.button_color))
         self.button_add_point = Button(self.input_form, text="Добавить новую точку",
                                        command=lambda: self.main_app_ref.add_point(self.combobox_points,
                                                                                    self.combobox_state))
@@ -109,7 +115,10 @@ class EditPointsForm:
 
         # Деактивация некоторых графических элементов (до выбора конкретной точки)
         self.combobox_state['state'] = 'disable'
-        self.button_color['state'] = 'disable'
+        if platform == 'darwin':
+            self.button_color['state'] = 'disabled'
+        else:
+            self.button_color['state'] = 'disable'
         self.button_delete_point['state'] = 'disable'
         self.label_x['state'] = 'disable'
         self.entry_x['state'] = 'disable'
