@@ -45,6 +45,7 @@ class App:
         filemenu.add_command(label="Открыть...", command=self.open_new_image_or_file_save)
         filemenu.add_command(label="Сохранить", command=self.save)
         filemenu.add_command(label="Отобразить редактор точек", command=self.build_edit_points_form)
+        filemenu.add_command(label="Начать сварку", command=self.start)
         filemenu.add_separator()
         filemenu.add_command(label="Выход", command=self.root.destroy)
         menu.add_cascade(label="Файл", menu=filemenu)
@@ -69,6 +70,9 @@ class App:
                     if self.input_form_window:
                         self.input_form_class.select_new_point_and_display_on_edit_point_form(self.select_point_id)
                     print("Выбрана точка: ", self.select_point_id)
+
+    def start(self):
+        pass
 
     def open_save(self, bytes_file_save=None):
         """
